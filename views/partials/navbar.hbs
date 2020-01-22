@@ -5,8 +5,17 @@
 
             <li class="{{#if isHome}}active{{/if}}"><a href="/">Home</a></li>
             <li class="{{#if isCourses}}active{{/if}}"><a href="/courses">Course list</a></li>
+
+            {{#if isAuth}}
+            <li class="{{#if isProfile}}active{{/if}}"><a href="/profile">Profile</a></li>
             <li class="{{#if isAdd}}active{{/if}}"><a href="/add">Add course</a></li>
             <li class="{{#if isCart}}active{{/if}}"><a href="/cart">Cart</a></li>
+            <li class="{{#if isOrder}}active{{/if}}"><a href="/orders">My orders</a></li>
+            <li ><a href="/auth/logout">Sign out</a></li>
+            {{else}}
+            <li class="{{#if isLogin}}active{{/if}}"><a href="/auth/login">Sign in</a></li>
+            {{/if}}
+
         </ul>
     </div>
 </nav>

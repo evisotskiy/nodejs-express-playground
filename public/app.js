@@ -1,22 +1,38 @@
-function formatPrice(price) {
+const formatPrice = price => {
     return new Intl.NumberFormat('ru-RU', {
         currency: 'rub',
         style: 'currency'
     }).format(price)
 }
 
-document.querySelectorAll('.price').forEach(node => {
-    node.textContent = formatPrice(node.textContent)
-});
+const formatDate = date => {
+    return new Intl.DateTimeFormat('ru-RU', {
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+    }).format(new Date(date))
+}
+
+
+document.querySelectorAll('.price').forEach(node => node.textContent = formatPrice(node.textContent));
+document.querySelectorAll('.date').forEach(node => node.textContent = formatDate(node.textContent));
+const instance = M.Tabs.init(document.querySelectorAll('.tabs'));
 
 const $cart = document.querySelector('#cart');
 if ($cart) {
     $cart.addEventListener('click', e => {
         if (e.target.classList.contains('js-remove')) {
             const id = event.target.dataset.id;
+            const csrf = event.target.dataset.csrf
 
             fetch('/cart/remove/' + id, {
-                method: 'delete'
+                method: 'delete',
+                headers: {
+                    'X-XSRF-TOKEN': csrf
+                }
             })
                 .then(res => res.json())
                 .then(cart => {

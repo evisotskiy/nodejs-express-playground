@@ -1,28 +1,52 @@
 const { Router } = require('express')
-const Cart = require('../models/cart')
 const Course = require('../models/course')
+const auth = require('../middleware/auth')
 const router = Router()
 
-router.get('/', async (req, res) => {
-    const { courses, price } = await Cart.fetch();
+const mapCartItems = ({ items }) => items.map(({ courseId, count }) => ({ ...courseId._doc, id: courseId.id, count }))
+const computePrice = courses => courses.reduce((total, {price, count}) => total += price * count, 0)
 
-    res.render('cart', {
-        title: 'Cart',
-        isCart: true,
-        courses,
-        price
-    })
+router.get('/', auth, async (req, res) => {
+    try {
+        const user = await req.user
+            .populate('cart.items.courseId')
+            .execPopulate()
+
+        const courses = mapCartItems(user.cart)
+
+        res.render('cart', {
+            title: 'Cart',
+            isCart: true,
+            courses,
+            price: computePrice(courses)
+        })
+    } catch (e) {
+        console.console.error(e);
+    }
 })
 
-router.post('/add', async (req, res) => {
-    const course = await Course.getById(req.body.id)
-    await Cart.add(course)
-    res.redirect('/cart')
+router.post('/add', auth, async (req, res) => {
+    try {
+        const course = await Course.findById(req.body.id)
+        await req.user.addToCart(course)
+        res.redirect('/cart')
+    } catch (e) {
+        console.console.error(e);
+    }
 });
 
-router.delete('/remove/:id', async(req, res) => {
-    const cart = await Cart.remove(req.params.id)
-    res.status(200).json(cart);
+router.delete('/remove/:id', auth, async (req, res) => {
+    try {
+        await req.user.removeFromCart(req.params.id)
+        const user = await req.user.populate('cart.items.courseId').execPopulate()
+
+        const courses = mapCartItems(user.cart)
+        const cart = { courses, price: computePrice(courses) }
+
+        res.json(cart);
+    } catch (e) {
+        console.console.error(e);
+    }
 });
 
 module.exports = router

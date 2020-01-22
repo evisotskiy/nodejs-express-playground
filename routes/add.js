@@ -1,21 +1,38 @@
 const { Router } = require('express');
+const { validationResult } = require('express-validator')
 const Course = require('../models/course')
+const auth = require('../middleware/auth')
 const router = Router();
+const { courseValidators } = require('../utils/validators')
 
-router.get('/', (req, res) => {
+router.get('/', auth, (req, res) => {
     res.render('add', {
         title: 'Add course',
         isAdd: true,
     })
 })
 
-router.post('/', async (req, res) => {
+router.post('/', auth, courseValidators, async (req, res) => {
     const { title, price, img } = req.body;
-    const course = new Course(title, price, img)
+    const validationErrors = validationResult(req);
 
-    await course.save();
+    if (!validationErrors.isEmpty()) {
+        return res.status(422).render('add', {
+            title: 'Add course',
+            isAdd: true,
+            error: validationErrors.array()[0].msg,
+            data: { title, price, img }
+        })
+    }
 
-    res.redirect('/courses')
+    const course = new Course({ title, price, img, userId: req.user })
+
+    try {
+        await course.save();
+        res.redirect('/courses')
+    } catch (e) {
+        console.error(e);
+    }
 })
 
 module.exports = router
