@@ -1,6 +1,7 @@
 const { Router } = require('express')
 const Course = require('../models/course')
 const auth = require('../middleware/auth')
+
 const router = Router()
 
 const mapCartItems = ({ items }) => items.map(({ courseId, count }) => ({ ...courseId._doc, id: courseId.id, count }))

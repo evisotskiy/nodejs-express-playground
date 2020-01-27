@@ -5,10 +5,11 @@ const {validationResult} = require('express-validator')
 const nodemailer = require('nodemailer')
 const sendgrid = require('nodemailer-sendgrid-transport')
 const User = require('../models/user')
-const router = Router()
 const regEmail = require('../emails/registration')
 const resetEmail = require('../emails/reset')
 const { registerValidators, loginValidators } = require('../utils/validators')
+
+const router = Router()
 
 const transporter = nodemailer.createTransport(sendgrid({
     auth: { api_key: process.env.SENDGRID_API_KEY}

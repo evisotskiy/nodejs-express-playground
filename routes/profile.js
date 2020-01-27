@@ -1,8 +1,10 @@
 const { Router } = require('express')
+const path = require('path')
+
 const auth = require('../middleware/auth')
 const User = require('../models/user')
+
 const router = Router()
-const path = require('path')
 
 router.get('/', auth, async (req, res) => {
     res.render('profile', {
