@@ -41,7 +41,7 @@
     }
   },
   "lint-staged": {
-    "**/*.js": "eslint --cache --fix --max-warnings=0",
-    "**/*.{js,css,md}": "prettier --write"
+    "*.js": "eslint --cache --fix --max-warnings=0",
+    "*": "prettier --write"
   }
 }
