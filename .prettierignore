@@ -1,0 +1,11 @@
+node_modules
+.local
+data
+images
+views
+
+.gitignore
+.eslintignore
+.prettierignore
+.env
+.env.example

@@ -1,53 +1,50 @@
-const {Router} = require('express')
-const Order = require('../models/order')
-const auth = require('../middleware/auth')
+const { Router } = require('express');
+const Order = require('../models/order');
+const auth = require('../middleware/auth');
 
-const router = Router()
+const router = Router();
 
 router.get('/', auth, async (req, res) => {
-    try {
-        const orders = await Order.find({ 'user.userId': req.user._id })
-            .populate('user.userId')
+  try {
+    const orders = await Order.find({ 'user.userId': req.user._id }).populate('user.userId');
 
-        res.render('orders', {
-            isOrder: true,
-            title: 'Orders',
-            orders: orders.map(_order => ({
-                ..._order._doc,
-                price: _order.courses.reduce((total, _course) => total += _course.count * _course.course.price, 0)
-            }))
-        })
-    } catch (e) {
-        console.error(e)
-    }
-})
+    res.render('orders', {
+      isOrder: true,
+      title: 'Orders',
+      orders: orders.map((_order) => ({
+        ..._order._doc,
+        price: _order.courses.reduce((total, _course) => (total += _course.count * _course.course.price), 0),
+      })),
+    });
+  } catch (e) {
+    console.error(e);
+  }
+});
 
 router.post('/', auth, async (req, res) => {
-    try {
-        const user = await req.user
-            .populate('cart.items.courseId')
-            .execPopulate()
+  try {
+    const user = await req.user.populate('cart.items.courseId').execPopulate();
 
-        const courses = user.cart.items.map(({ count, courseId }) => ({
-            count,
-            course: { ...courseId._doc }
-        }))
+    const courses = user.cart.items.map(({ count, courseId }) => ({
+      count,
+      course: { ...courseId._doc },
+    }));
 
-        const order = new Order({
-            user: {
-                name: req.user.name,
-                userId: req.user
-            },
-            courses
-        })
+    const order = new Order({
+      user: {
+        name: req.user.name,
+        userId: req.user,
+      },
+      courses,
+    });
 
-        await order.save()
-        await req.user.clearCart()
+    await order.save();
+    await req.user.clearCart();
 
-        res.redirect('/orders')
-    } catch (e) {
-        console.error(e)
-    }
-})
+    res.redirect('/orders');
+  } catch (e) {
+    console.error(e);
+  }
+});
 
-module.exports = router
+module.exports = router;
